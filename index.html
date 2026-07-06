@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>프리나다움_주식 스터디 워크북</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --bg:#f6f8fa;
+    --card:#ffffff;
+    --ink:#1c2733;
+    --muted:#8a8f87;
+    --border:#e2e7ec;
+    --accent:#1e4d7b;
+    --accent-soft:#e8f0f7;
+    --accent-dim:#4f7294;
+    --gold:#9c7a35;
+    --gold-soft:#f4ecd9;
+    --danger:#b3604f;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    padding:28px 18px 80px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:880px;margin:0 auto;}
+
+  .topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:20px;
+    padding-bottom:16px;
+    border-bottom:1px solid var(--border);
+  }
+  .topbar h1{
+    font-size:19px;
+    font-weight:700;
+    margin:0 0 4px;
+    letter-spacing:-0.2px;
+  }
+  .topbar .meta{
+    font-size:12px;
+    color:var(--muted);
+    letter-spacing:0.2px;
+  }
+
+  .card{
+    background:var(--card);
+    border-radius:10px;
+    padding:20px;
+    box-shadow:0 1px 2px rgba(20,20,18,0.04);
+    margin-bottom:16px;
+    border:1px solid var(--border);
+  }
+  .card h2{
+    margin:0 0 4px;
+    font-size:14px;
+    font-weight:700;
+    letter-spacing:0.2px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    color:var(--ink);
+  }
+  .card .stage-desc{
+    font-size:12px;
+    color:var(--muted);
+    margin:0 0 14px;
+  }
+  .bar-mark{
+    width:3px;height:14px;background:var(--accent);border-radius:1px;display:inline-block;
+  }
+
+  button{
+    cursor:pointer;
+    border:1px solid transparent;
+    border-radius:7px;
+    padding:8px 13px;
+    font-size:12.5px;
+    font-weight:600;
+    background:var(--accent);
+    color:#fff;
+    transition:background .12s ease, border-color .12s ease, opacity .12s ease;
+  }
+  button.secondary{
+    background:#fff;
+    color:var(--ink);
+    border:1px solid var(--border);
+  }
+  button.secondary:hover:not(:disabled){ border-color:var(--accent); color:var(--accent); }
+  button.danger{ background:#fff; color:var(--danger); border:1px solid var(--border); }
+  button.danger:hover:not(:disabled){ border-color:var(--danger); background:#fbf1ef; }
+  button:disabled{ opacity:.4; cursor:not-allowed; }
+  button:hover:not(:disabled){ background:#163b5c; }
+  button.secondary:hover:not(:disabled){ background:var(--accent-soft); }
+  button:active:not(:disabled){ transform:scale(0.98); }
+
+  input[type=text], input[type=date], textarea, select{
+    font-family:inherit;
+    border:1px solid var(--border);
+    border-radius:7px;
+    padding:7px 9px;
+    font-size:13px;
+    background:#fff;
+    color:var(--ink);
+  }
+  textarea{ width:100%; min-height:72px; resize:vertical; line-height:1.55; }
+
+  /* ---------- list view ---------- */
+  .toolbar{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; gap:8px; flex-wrap:wrap; }
+  .empty{ text-align:center; color:var(--muted); font-size:13px; padding:50px 10px; }
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+    gap:12px;
+  }
+  .stock-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:16px;
+    cursor:pointer;
+    transition:border-color .12s ease, box-shadow .12s ease;
+  }
+  .stock-card:hover{ border-color:var(--accent); box-shadow:0 2px 10px rgba(30,77,123,0.10); }
+  .stock-card .name{ font-weight:700; font-size:15px; margin-bottom:2px; }
+  .stock-card .ticker{ font-size:12px; color:var(--gold); font-weight:600; margin-bottom:10px; }
+  .stock-card .bar-bg{ background:var(--border); border-radius:3px; height:5px; overflow:hidden; margin-bottom:6px; }
+  .stock-card .bar-fill{ height:100%; background:var(--accent); border-radius:3px; }
+  .stock-card .pct-row{ display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-bottom:12px; }
+  .stock-card .row-actions{ display:flex; gap:6px; }
+  .stock-card .row-actions button{ flex:1; font-size:11.5px; padding:6px 8px; }
+
+  /* ---------- editor view ---------- */
+  #view-editor{ display:none; }
+  .editor-head{
+    display:flex; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap;
+  }
+  .editor-head .back{ background:none; border:none; color:var(--muted); font-size:13px; padding:4px 6px; }
+  .editor-head .back:hover{ color:var(--accent); }
+  .info-grid{
+    display:grid; grid-template-columns:1.3fr 1fr 1fr; gap:10px; margin-bottom:10px;
+  }
+  .info-grid label{ display:block; font-size:11px; color:var(--muted); margin-bottom:4px; }
+  .info-grid input{ width:100%; }
+  .save-status{ font-size:11.5px; color:var(--muted); }
+  .actions-row{ display:flex; gap:8px; flex-wrap:wrap; margin:14px 0 4px; }
+
+  .q-block{ margin-bottom:18px; }
+  .q-block:last-child{ margin-bottom:0; }
+  .q-label{ display:flex; gap:8px; align-items:baseline; margin-bottom:4px; }
+  .q-num{ font-size:11px; font-weight:700; color:var(--accent); background:var(--accent-soft); border-radius:5px; padding:2px 7px; }
+  .q-title{ font-size:13.5px; font-weight:600; line-height:1.5; }
+  .q-note{ font-size:11.5px; color:var(--muted); line-height:1.6; margin:4px 0 8px; padding:8px 10px; background:var(--bg); border:1px solid var(--border); border-radius:7px; }
+
+  .legend{ font-size:11.5px; color:var(--muted); background:var(--gold-soft); border:1px solid #e6d29c; border-radius:7px; padding:10px 12px; margin-bottom:12px; line-height:1.7; }
+  .legend b{ color:var(--gold); }
+
+
+  .stage-title{
+    font-size:15px; font-weight:700; margin:26px 0 10px; padding-top:6px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .stage-title:first-of-type{ margin-top:0; }
+  .stage-badge{
+    font-size:10.5px; font-weight:700; color:#fff; background:var(--accent);
+    border-radius:5px; padding:3px 8px; letter-spacing:.3px;
+  }
+
+  @media (max-width:640px){
+    .info-grid{ grid-template-columns:1fr; }
+  }
+  @media print{
+    body{ padding:0; background:#fff; }
+    .no-print{ display:none !important; }
+    .card{ box-shadow:none; border:1px solid #ddd; break-inside:avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div>
+      <h1>📊 프리나다움_주식 스터디 워크북</h1>
+      <div class="meta">나만의 종목 분석 워크북 · 한 종목씩 깊게 파보기</div>
+      <div class="meta">✏️ 이 기록은 내 브라우저에만 저장돼요. 다른 사람과 공유되지 않는 나만의 학습 노트예요.</div>
+    </div>
+  </div>
+
+  <!-- ================= LIST VIEW ================= -->
+  <div id="view-list">
+    <div class="toolbar">
+      <div class="meta">총 <b id="stockCount">0</b>개 종목 스터디 중</div>
+      <button id="btnNew">+ 새 종목 만들기</button>
+    </div>
+    <div id="listEmpty" class="empty">
+      아직 등록된 종목이 없어요.<br>"+ 새 종목 만들기"로 첫 워크북을 시작해보세요.
+    </div>
+    <div id="grid" class="grid"></div>
+  </div>
+
+  <!-- ================= EDITOR VIEW ================= -->
+  <div id="view-editor">
+    <div class="editor-head no-print">
+      <button class="back" id="btnBack">← 목록으로</button>
+      <span class="save-status" id="saveStatus"></span>
+    </div>
+
+    <div class="card no-print">
+      <div class="info-grid">
+        <div>
+          <label>종목명</label>
+          <input type="text" id="fName" placeholder="예: 엔비디아">
+        </div>
+        <div>
+          <label>티커</label>
+          <input type="text" id="fTicker" placeholder="예: NVDA">
+        </div>
+        <div>
+          <label>작성자</label>
+          <input type="text" id="fAuthor" placeholder="이름 / 닉네임">
+        </div>
+      </div>
+      <div class="actions-row">
+        <button id="btnTempSave">💾 임시저장</button>
+        <button class="danger" id="btnDelete">삭제</button>
+      </div>
+    </div>
+
+    <div id="captureArea"></div>
+  </div>
+
+</div>
+
+<script>
+const STORAGE_KEY = 'stockWorkbooks_v1';
+
+const STAGES = {
+  1:'STEP 1 · 종목 정하기',
+  2:'STEP 2 · 이 회사는 무슨 회사일까?',
+  3:'STEP 3 · 이 회사를 이끄는 사람',
+  4:'STEP 4 · 숫자로 확인하기',
+  5:'STEP 5 · 투자할 회사인지 판단하기',
+  6:'STEP 6 · 나만의 투자 기준 정리',
+  7:'STEP 7 · 마무리 — 오늘 얼마나 알게 됐나요?'
+};
+
+const QUESTIONS = [
+  { id:'q1', stage:1, title:'지금 공부해볼 주식 종목을 딱 한 가지만 정해보세요.' },
+  { id:'q2', stage:1, title:'많은 종목 중에서 왜 이 종목을 골랐나요?',
+    note:'특별한 이유가 없어도 괜찮습니다. "그냥 들어봐서", "써봐서 좋아서" 도 훌륭한 시작점이에요.' },
+
+  { id:'q3', stage:2, title:'이 회사는 어떤 문제를 해결하는 회사인가요?' },
+  { id:'q4', stage:2, title:'이 회사는 어떻게 돈을 버나요? 가장 매출이 큰 제품이나 서비스는 무엇인가요?',
+    note:'경기가 좋지 않아져도 이 제품/서비스는 계속 잘 팔릴 수 있을지도 함께 생각해보세요.' },
+  { id:'q5', stage:2, title:'이 회사의 경쟁사는 어디인가요? (최대 3곳) 이 시장에서 이 회사의 위치(점유율)는 어느 정도인가요?',
+    note:'선정한 종목과 관련된 기사를 골라 연계해서 공부하면 훨씬 깊이 있는 학습이 가능해요. 웹검색이나 AI를 활용해도 좋지만, 가능한 한 "진짜" 믿을 수 있는 내용인지 검증해보세요.' },
+
+  { id:'q6', stage:3, title:'CEO는 누구인가요? 어떤 사람이고 왜 이 회사를 만들었는지, 장기적인 비전은 무엇인지 확인해보세요.',
+    note:'다음 3가지 외에도 더 공부할수록 좋습니다. ① 과거에 어떤 일을 했던 사람인지 ② 단기적인 돈을 보는 사람인지, 장기 비전이 있는 사람인지 ③ 함께 일하는 조력자들은 누구인지' },
+  { id:'q7', stage:3, title:'CEO 인터뷰 영상이 있다면 찾아서 시청해보세요. 어떤 사람으로 느껴지나요?' },
+  { id:'q8', stage:3, title:'회사 홈페이지에 들어가보세요. 메인 화면에는 무엇이 있는지, CEO의 기업 철학은 무엇인지 확인하고 지금까지 알아본 내용과 비교해보세요.',
+    note:'외국 기업이라 영어가 어렵다면 번역 시스템을 활용해보세요. 내 돈을 맡기고 나 대신 돈을 벌어다 줄 곳입니다. 믿을 수 있는 곳인지 검증하는 연습이에요.' },
+
+  { id:'q9', stage:4, title:'매출은 늘고 있나요? 영업이익도 늘고 있나요? 빚(부채)은 얼마나 있나요?' },
+  { id:'q10', stage:4, title:'이 회사의 시가총액은 얼마인가요? PER은 몇인가요? 위에서 찾은 경쟁사들의 PER과 비교하면 비싼 편인가요, 싼 편인가요?' },
+  { id:'q11', stage:4, title:'배당을 주는 회사인가요? 배당을 준다면 어느 시기에 얼만큼의 배당금을 주는지 확인해보세요.',
+    note:'진짜 돈을 버는 기업인지 확인해보는 질문이에요.' },
+
+  { id:'q12', stage:5, title:'이 회사는 10년 뒤에도 살아남을 것 같나요? 만일 이 회사가 망한다면 어떤 이유일까요?' },
+  { id:'q13', stage:5, title:'이 회사는 위기가 닥쳤을 때 버틸 힘이 있다고 보여지나요? 위에서 살펴본 CEO의 성향을 다시 떠올리며, 어려움을 극복할 수 있는 사람인지 체크해봅시다.' },
+  { id:'q14', stage:5, title:'지금 이 회사의 주가 차트는 어떤 상태로 보이나요? 자유롭게 생각을 적어보세요.' },
+  { id:'q15', stage:5, title:'지금까지 공부해보니, 이 회사에 투자할 이유가 충분한가요? 그런 이유와, 아닌 이유를 함께 생각해봅시다.' },
+
+  { id:'q16', stage:6, title:'나는 앞으로 어떤 기업에 투자를 하고 싶은가요? 반대로 절대 투자하지 않을 기업은 어떤 곳인가요?' },
+  { id:'q17', stage:6, title:'어떤 CEO가 운영하는 기업에는 투자하지 않을 것인지, 나만의 기준을 적어봅시다.' },
+
+  { id:'q18', stage:7, title:'오늘 스터디를 진행하며 느낀 점, 깨달은 점, 앞으로의 방향 등 나의 생각을 자유롭게 적어보세요.' }
+];
+
+const TOTAL_FIELDS = QUESTIONS.length + 1; // +1 for self-check widget
+
+let state = { list: [], currentId: null, saveTimer: null };
+
+function load(){
+  try{ state.list = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  catch(e){ state.list = []; }
+}
+function persist(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state.list));
+}
+function uid(){ return 'w' + Date.now() + Math.random().toString(16).slice(2,7); }
+function nowStr(){
+  const d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+}
+function newWorkbook(){
+  const answers = {};
+  QUESTIONS.forEach(q => answers[q.id] = '');
+  return {
+    id: uid(), name:'', ticker:'', author:'',
+    createdAt: nowStr(), updatedAt: nowStr(),
+    answers,
+    selfCheck: { score:0, note:'' }
+  };
+}
+function getCurrent(){ return state.list.find(w => w.id === state.currentId); }
+
+function progress(w){
+  let filled = 0;
+  QUESTIONS.forEach(q => { if((w.answers[q.id]||'').trim()) filled++; });
+  if(w.selfCheck && ((w.selfCheck.score||0) > 0 || (w.selfCheck.note||'').trim())) filled++;
+  return Math.round(filled / TOTAL_FIELDS * 100);
+}
+
+/* ---------------- LIST VIEW ---------------- */
+function renderList(){
+  document.getElementById('view-list').style.display = '';
+  document.getElementById('view-editor').style.display = 'none';
+  const grid = document.getElementById('grid');
+  const empty = document.getElementById('listEmpty');
+  document.getElementById('stockCount').textContent = state.list.length;
+  grid.innerHTML = '';
+  empty.style.display = state.list.length ? 'none' : '';
+  state.list
+    .slice()
+    .sort((a,b) => (b.updatedAt||'').localeCompare(a.updatedAt||''))
+    .forEach(w => {
+      const pct = progress(w);
+      const card = document.createElement('div');
+      card.className = 'stock-card';
+      card.innerHTML = `
+        <div class="name">${escapeHtml(w.name) || '(종목명 없음)'}</div>
+        <div class="ticker">${escapeHtml(w.ticker) || '-'}</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div>
+        <div class="pct-row"><span>${pct}% 작성</span><span>${w.updatedAt}</span></div>
+        <div class="row-actions">
+          <button class="secondary" data-act="open">열기</button>
+          <button class="secondary" data-act="dup">복제</button>
+          <button class="danger" data-act="del">삭제</button>
+        </div>`;
+      card.querySelector('[data-act="open"]').onclick = (e) => { e.stopPropagation(); openEditor(w.id); };
+      card.querySelector('[data-act="dup"]').onclick = (e) => {
+        e.stopPropagation();
+        const copy = JSON.parse(JSON.stringify(w));
+        copy.id = uid();
+        copy.name = w.name + ' (복사본)';
+        copy.createdAt = nowStr(); copy.updatedAt = nowStr();
+        state.list.push(copy); persist(); renderList();
+      };
+      card.querySelector('[data-act="del"]').onclick = (e) => {
+        e.stopPropagation();
+        if(confirm(`"${w.name || '이 워크북'}"을(를) 삭제할까요? 되돌릴 수 없습니다.`)){
+          state.list = state.list.filter(x => x.id !== w.id);
+          persist(); renderList();
+        }
+      };
+      card.onclick = () => openEditor(w.id);
+      grid.appendChild(card);
+    });
+}
+function escapeHtml(s){
+  return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ---------------- EDITOR VIEW ---------------- */
+function openEditor(id){
+  state.currentId = id;
+  document.getElementById('view-list').style.display = 'none';
+  document.getElementById('view-editor').style.display = 'block';
+  const w = getCurrent();
+  document.getElementById('fName').value = w.name;
+  document.getElementById('fTicker').value = w.ticker;
+  document.getElementById('fAuthor').value = w.author;
+  document.getElementById('saveStatus').textContent = `마지막 저장 ${w.updatedAt}`;
+  renderQuestions(w);
+}
+
+function renderQuestions(w){
+  const area = document.getElementById('captureArea');
+  area.innerHTML = '';
+  let lastStage = null;
+
+  QUESTIONS.forEach(q => {
+    if(q.stage !== lastStage){
+      const st = document.createElement('div');
+      st.className = 'stage-title';
+      st.innerHTML = `<span class="stage-badge">STAGE ${q.stage}</span> ${STAGES[q.stage]}`;
+      area.appendChild(st);
+      lastStage = q.stage;
+
+      // self-check widget injects right after the final stage title, before the closing reflection question
+      if(q.stage === 7){
+        area.appendChild(buildSelfCheckCard(w));
+      }
+    }
+    area.appendChild(buildQCard(w, q));
+  });
+}
+
+function buildQCard(w, q){
+  const card = document.createElement('div');
+  card.className = 'card q-block';
+  const num = q.id.replace('q','Q');
+  card.innerHTML = `
+    <div class="q-label"><span class="q-num">${num}</span><span class="q-title">${escapeHtml(q.title)}</span></div>
+    ${q.note ? `<div class="q-note">${escapeHtml(q.note)}</div>` : ''}
+    <textarea data-qid="${q.id}" placeholder="여기에 답변을 적어보세요...">${escapeHtml(w.answers[q.id])}</textarea>
+  `;
+  card.querySelector('textarea').addEventListener('input', (e) => {
+    w.answers[q.id] = e.target.value;
+    scheduleSave();
+  });
+  return card;
+}
+
+function buildSelfCheckCard(w){
+  const card = document.createElement('div');
+  card.className = 'card q-block';
+  card.innerHTML = `
+    <div class="q-label"><span class="q-num">자기점검</span><span class="q-title">이 워크북을 채운 지금, 이 종목에 대한 나의 "안다"의 정도는 몇 점인가요?</span></div>
+    <div class="legend">
+      <b>안다의 정의</b> — 0: 들어본 적 없다 · 1: 들어본 적 있다 · 2: 최근 이슈를 안다 · 3: 재무제표를 봤다 · 4: 앞으로의 방향을 안다 · 5: 이 회사의 모든 걸 설명할 수 있다
+    </div>
+    <select id="selfScore" style="margin-bottom:10px;">
+      ${[0,1,2,3,4,5].map(n => `<option value="${n}" ${Number(w.selfCheck.score)===n?'selected':''}>${n}점</option>`).join('')}
+    </select>
+    <textarea id="selfNote" placeholder="왜 이 점수라고 생각하나요? 더 알아야 할 부분은 무엇인가요?">${escapeHtml(w.selfCheck.note)}</textarea>
+  `;
+  card.querySelector('#selfScore').addEventListener('input', (e) => {
+    w.selfCheck.score = Number(e.target.value);
+    scheduleSave();
+  });
+  card.querySelector('#selfNote').addEventListener('input', (e) => {
+    w.selfCheck.note = e.target.value;
+    scheduleSave();
+  });
+  return card;
+}
+
+function scheduleSave(){
+  clearTimeout(state.saveTimer);
+  document.getElementById('saveStatus').textContent = '저장 중...';
+  state.saveTimer = setTimeout(forceSave, 500);
+}
+function forceSave(){
+  clearTimeout(state.saveTimer);
+  const w = getCurrent();
+  w.updatedAt = nowStr();
+  persist();
+  document.getElementById('saveStatus').textContent = `저장됨 ${w.updatedAt}`;
+}
+
+/* ---------------- events ---------------- */
+document.getElementById('btnNew').onclick = () => {
+  const w = newWorkbook();
+  state.list.push(w);
+  persist();
+  openEditor(w.id);
+};
+document.getElementById('btnBack').onclick = () => renderList();
+document.getElementById('btnDelete').onclick = () => {
+  const w = getCurrent();
+  if(confirm(`"${w.name || '이 워크북'}"을(를) 삭제할까요? 되돌릴 수 없습니다.`)){
+    state.list = state.list.filter(x => x.id !== w.id);
+    persist();
+    renderList();
+  }
+};
+['fName','fTicker','fAuthor'].forEach(id => {
+  document.getElementById(id).addEventListener('input', (e) => {
+    const w = getCurrent();
+    const key = id.replace('f','').toLowerCase();
+    w[key] = e.target.value;
+    scheduleSave();
+  });
+});
+document.getElementById('btnTempSave').onclick = () => {
+  forceSave();
+  const status = document.getElementById('saveStatus');
+  status.textContent = `✔ 임시저장 완료 ${getCurrent().updatedAt}`;
+};
+
+/* ---------------- init ---------------- */
+load();
+renderList();
+</script>
+</body>
+</html>
