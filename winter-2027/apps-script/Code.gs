@@ -28,6 +28,9 @@ var OPEN_AT = '';
 /** 접수 마감 시각. 비워두면 마감하지 않습니다. */
 var CLOSE_AT = '';
 
+/** 남은 자리가 이 수 이하이면 페이지에 '마감임박'으로 표시합니다. 정확한 인원 수는 학부모에게 공개하지 않습니다. */
+var FEW_AT = 3;
+
 var SHEET_NAME = '신청내역';
 var RECEIPT_PREFIX = 'W27-';
 
@@ -67,20 +70,15 @@ function doPost(e) {
 // ───────── 동작 ─────────
 
 function status_() {
+  // 학부모 페이지에는 반별 상태(접수중/마감임박/마감)만 내보내고, 실제 신청 인원은 내보내지 않습니다.
   var counts = counts_(rows_());
   var classes = {};
   Object.keys(CLASSES).forEach(function (code) {
-    var c = CLASSES[code];
-    classes[code] = {
-      name: c.name,
-      capacity: c.capacity,
-      taken: counts[code].ok,
-      waiting: counts[code].wait,
-      remaining: Math.max(0, c.capacity - counts[code].ok)
-    };
+    var remaining = CLASSES[code].capacity - counts[code].ok;
+    classes[code] = { state: remaining <= 0 ? 'full' : remaining <= FEW_AT ? 'few' : 'open' };
   });
   var w = window_();
-  return { ok: true, open: w.open, phase: w.phase, openAt: OPEN_AT, closeAt: CLOSE_AT, classes: classes, now: new Date().toISOString() };
+  return { ok: true, open: w.open, phase: w.phase, openAt: OPEN_AT, closeAt: CLOSE_AT, classes: classes };
 }
 
 function apply_(b) {
@@ -164,7 +162,7 @@ function apply_(b) {
     var waitingNo = status === STATUS_WAIT ? counts[f.classCode].wait + 1 : 0;
     return {
       ok: true, status: status, receiptNo: receiptNo, className: cls.name,
-      waitingNo: waitingNo, remaining: Math.max(0, cls.capacity - counts[f.classCode].ok - (status === STATUS_OK ? 1 : 0))
+      waitingNo: waitingNo
     };
   } finally {
     lock.releaseLock();
